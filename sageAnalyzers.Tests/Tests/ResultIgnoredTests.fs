@@ -1,0 +1,1 @@
+module SageAnalyzers.Tests.ResultIgnoredTests

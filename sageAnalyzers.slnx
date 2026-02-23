@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="sageAnalyzers.fsproj" />
+  <Project Path="sageAnalyzers.Tests\sageAnalyzers.Tests.fsproj" />
+</Solution>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OtherFlags>$(OtherFlags) --test:GraphBasedChecking</OtherFlags>
+    <OtherFlags>$(OtherFlags) --test:DumpCheckingGraph</OtherFlags>
+    <NoWarn>FS0075</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Analyzers.SDK" Version="0.36.0" />
+    <PackageReference Include="FSharp.Analyzers.SDK.Testing" Version="0.36.0" />
+    <PackageReference Include="Expecto" Version="10.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\sageAnalyzers.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Tests\ResultIgnoredTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+</Project>

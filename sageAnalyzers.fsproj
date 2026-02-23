@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <OtherFlags>$(OtherFlags) --test:GraphBasedChecking</OtherFlags>
+    <OtherFlags>$(OtherFlags) --test:DumpCheckingGraph</OtherFlags>
+    <NoWarn>FS0075</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Analyzers.SDK" Version="0.36.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="SageUtil.fs" />
+    <Compile Include="Analyzers\ResultIgnoredAnalyzer.fs" />
+    <Compile Include="Analyzers\MutableEventTypeAnalyzer.fs" />
+    <Compile Include="Analyzers\AsyncIgnoredAnalyzer.fs" />
+    <Compile Include="Analyzers\ExceptionInDomainLayerAnalyzer.fs" />
+    <Compile Include="Analyzers\PrimitiveObsessionAnalyzer.fs" />
+    <Compile Include="Analyzers\MixedErrorStrategyAnalyzer.fs" />
+    <Compile Include="Analyzers\MutableInPureFunctionAnalyzer.fs" />
+    <Compile Include="Analyzers\ImpureProjectionAnalyzer.fs" />
+  </ItemGroup>
+
+</Project>
