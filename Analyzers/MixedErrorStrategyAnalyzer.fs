@@ -87,21 +87,3 @@ let toMessages (violations: (range * string) list) : Message list =
 
 let analyze (typedTree: FSharpImplementationFileContents) : Message list =
   collectViolations typedTree |> toMessages
-
-[<CliAnalyzer(Name, Description)>]
-let cliAnalyzer (ctx: CliContext) : Async<Message list> =
-  async {
-    return
-      ctx.TypedTree
-      |> Option.map analyze
-      |> Option.defaultValue []
-  }
-
-[<EditorAnalyzer(Name, Description)>]
-let editorAnalyzer (ctx: EditorContext) : Async<Message list> =
-  async {
-    return
-      ctx.TypedTree
-      |> Option.map analyze
-      |> Option.defaultValue []
-  }

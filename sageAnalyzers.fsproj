@@ -22,6 +22,7 @@
     <Compile Include="Analyzers\MixedErrorStrategyAnalyzer.fs" />
     <Compile Include="Analyzers\MutableInPureFunctionAnalyzer.fs" />
     <Compile Include="Analyzers\ImpureProjectionAnalyzer.fs" />
+    <Compile Include="Analyzers\CombinedAnalyzer.fs" />
   </ItemGroup>
 
 </Project>
