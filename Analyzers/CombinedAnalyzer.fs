@@ -8,7 +8,7 @@ let Name = "Sage Combined Analyzer"
 
 [<Literal>]
 let Description =
-  "Runs all SAGE analyzers (001-008) in a single pass to avoid thread pool starvation"
+  "Runs all SAGE analyzers (001-009) in a single pass to avoid thread pool starvation"
 
 let private analyzers: (FSharpImplementationFileContents -> Message list) list =
   [
@@ -20,6 +20,7 @@ let private analyzers: (FSharpImplementationFileContents -> Message list) list =
     MixedErrorStrategyAnalyzer.analyze
     MutableInPureFunctionAnalyzer.analyze
     ImpureProjectionAnalyzer.analyze
+    RefCellAnalyzer.analyze
   ]
 
 let analyze (typedTree: FSharpImplementationFileContents) : Message list =
