@@ -4,6 +4,7 @@ open FSharp.Analyzers.SDK
 open FSharp.Analyzers.SDK.TASTCollecting
 open FSharp.Compiler.Symbols
 open FSharp.Compiler.Text
+open SageAnalyzers.Util
 
 [<Literal>]
 let Code = "SAGE-002"
@@ -21,16 +22,16 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
   let walker =
     { new TypedTreeCollectorBase() with
         override _.WalkEntity (entity: FSharpEntity) (_decls: FSharpImplementationFileDeclaration list) =
-          let isInEventsModule =
+          let inEvents =
             match entity.TryGetFullName() with
-            | Some name -> name.Contains("Events")
+            | Some name -> isEventsModule name
             | None ->
               entity.DeclaringEntity
               |> Option.bind (fun e -> e.TryGetFullName())
-              |> Option.map (fun n -> n.Contains("Events"))
+              |> Option.map isEventsModule
               |> Option.defaultValue false
 
-          if isInEventsModule then
+          if inEvents then
             if entity.IsFSharpRecord then
               for field in entity.FSharpFields do
                 if field.IsMutable then
@@ -59,17 +60,5 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
   walkTast walker typedTree
   violations |> Seq.toList
 
-let toMessages (violations: (range * string) list) : Message list =
-  violations
-  |> List.map (fun (range, msg) ->
-    {
-      Type = Name
-      Message = msg
-      Code = Code
-      Severity = Severity.Error
-      Range = range
-      Fixes = []
-    })
-
 let analyze (typedTree: FSharpImplementationFileContents) : Message list =
-  collectViolations typedTree |> toMessages
+  collectViolations typedTree |> toMessages Code Name Severity.Warning

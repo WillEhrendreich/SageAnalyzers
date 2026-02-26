@@ -14,7 +14,7 @@ let Name = "Primitive Obsession Analyzer"
 
 [<Literal>]
 let Description =
-  "Detects public functions with primitive parameter types in domain modules"
+  "Detects public functions with swappable primitive parameters of the same type"
 
 let collectViolations (typedTree: FSharpImplementationFileContents) =
   let violations = ResizeArray<range * string>()
@@ -35,33 +35,35 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
           let modName = currentModule.Value
           if modName <> "" && not (isInfrastructureModule modName) then
             if mfv.Accessibility.IsPublic then
-              for paramGroup in mfv.CurriedParameterGroups do
-                for param in paramGroup do
-                  if isPrimitiveType param.Type then
-                    violations.Add(
-                      mfv.DeclarationLocation,
-                      sprintf
-                        "Parameter '%s' of type '%s' in public function '%s'. Consider using a domain-specific type wrapper."
-                        param.DisplayName
-                        (resolveTypeName param.Type)
-                        mfv.DisplayName
-                    )
+              let primitiveParams =
+                mfv.CurriedParameterGroups
+                |> Seq.collect id
+                |> Seq.filter (fun p -> isPrimitiveType p.Type)
+                |> Seq.map (fun p -> resolveTypeName p.Type, p.DisplayName)
+                |> Seq.toList
+              let duplicateTypes =
+                primitiveParams
+                |> List.map fst
+                |> List.countBy id
+                |> List.filter (fun (_, count) -> count >= 2)
+              for (typeName, _) in duplicateTypes do
+                let paramNames =
+                  primitiveParams
+                  |> List.filter (fun (t, _) -> t = typeName)
+                  |> List.map snd
+                  |> String.concat ", "
+                violations.Add(
+                  mfv.DeclarationLocation,
+                  sprintf
+                    "Parameters [%s] are all '%s' in public function '%s'. Swappable primitives — consider domain-specific type wrappers."
+                    paramNames
+                    typeName
+                    mfv.DisplayName
+                )
     }
 
   walkTast walker typedTree
   violations |> Seq.toList
 
-let toMessages (violations: (range * string) list) : Message list =
-  violations
-  |> List.map (fun (range, msg) ->
-    {
-      Type = Name
-      Message = msg
-      Code = Code
-      Severity = Severity.Warning
-      Range = range
-      Fixes = []
-    })
-
 let analyze (typedTree: FSharpImplementationFileContents) : Message list =
-  collectViolations typedTree |> toMessages
+  collectViolations typedTree |> toMessages Code Name Severity.Warning

@@ -60,6 +60,14 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
               | TryWith(tryBody, _, _, _, catchBody, _, _) ->
                 walkExpr tryBody
                 walkExpr catchBody
+              | Call(_, _, _, _, args) ->
+                for arg in args do walkExpr arg
+              | Application(funcExpr, _, argExprs) ->
+                walkExpr funcExpr
+                for arg in argExprs do walkExpr arg
+              | DecisionTree(root, cases) ->
+                walkExpr root
+                for (_, caseExpr) in cases do walkExpr caseExpr
               | _ -> ()
             walkExpr body
     }
@@ -67,17 +75,5 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
   walkTast walker typedTree
   violations |> Seq.toList
 
-let toMessages (violations: (range * string) list) : Message list =
-  violations
-  |> List.map (fun (range, msg) ->
-    {
-      Type = Name
-      Message = msg
-      Code = Code
-      Severity = Severity.Warning
-      Range = range
-      Fixes = []
-    })
-
 let analyze (typedTree: FSharpImplementationFileContents) : Message list =
-  collectViolations typedTree |> toMessages
+  collectViolations typedTree |> toMessages Code Name Severity.Warning

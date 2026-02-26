@@ -69,17 +69,5 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
   walkTast walker typedTree
   violations |> Seq.toList
 
-let toMessages (violations: (range * string) list) : Message list =
-  violations
-  |> List.map (fun (range, msg) ->
-    {
-      Type = Name
-      Message = msg
-      Code = Code
-      Severity = Severity.Error
-      Range = range
-      Fixes = []
-    })
-
 let analyze (typedTree: FSharpImplementationFileContents) : Message list =
-  collectViolations typedTree |> toMessages
+  collectViolations typedTree |> toMessages Code Name Severity.Warning

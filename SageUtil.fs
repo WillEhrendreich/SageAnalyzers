@@ -1,6 +1,8 @@
 module SageAnalyzers.Util
 
+open FSharp.Analyzers.SDK
 open FSharp.Compiler.Symbols
+open FSharp.Compiler.Text
 
 /// Safely get the type of an FSharpExpr, returning None if it throws
 let tryGetExprType (expr: FSharpExpr) =
@@ -105,12 +107,26 @@ let impureCallNames =
     "System.Guid.NewGuid"
   ]
 
+/// Check if a fully-qualified name has "Events" as an exact dotted segment
+let isEventsModule (name: string) =
+  let parts = name.Split('.')
+  parts |> Array.exists (fun p -> p = "Events")
+
 /// Check if a function is in a projection/aggregate context
-let isProjectionContext (moduleName: string) (functionName: string) =
+let isProjectionContext (moduleName: string) (_functionName: string) =
   moduleName.Contains("Projection")
   || moduleName.Contains("Aggregate")
-  || functionName = "Apply"
-  || functionName = "Create"
-  || functionName = "Evolve"
-  || functionName = "Fold"
+
+/// Shared message builder for all analyzers
+let toMessages code name severity (violations: (range * string) list) : Message list =
+  violations
+  |> List.map (fun (range, msg) ->
+    {
+      Type = name
+      Message = msg
+      Code = code
+      Severity = severity
+      Range = range
+      Fixes = []
+    })
 
