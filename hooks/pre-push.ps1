@@ -1,5 +1,22 @@
 #!/usr/bin/env pwsh
 
+# Build in Release mode to catch FS3511 and other codegen warnings
+# FS3511 ("state machine not statically compilable") only surfaces during
+# code generation, which may differ between Debug and Release. Building
+# Release locally mirrors CI and catches it before push.
+Write-Host "Building in Release mode (FS3511 safety gate)..."
+$slnx = Get-ChildItem -Path . -Filter *.slnx | Select-Object -First 1
+if ($slnx) {
+    dotnet build $slnx.FullName -c Release --no-restore -consoleLoggerParameters:NoSummary 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Release build failed — fix errors before pushing." -ForegroundColor Red
+        Write-Host "Hint: FS3511 means a task CE can't be statically compiled."
+        Write-Host "      Simplify try/with nesting or restructure the async flow."
+        exit 1
+    }
+    Write-Host "Release build passed." -ForegroundColor Green
+}
+
 $projectFiles = Get-ChildItem -Path . -Recurse -Include *.fsproj,*.csproj,*.vbproj | Select-Object -First 1
 
 if (-not $projectFiles) {

@@ -15,4 +15,4 @@ if ($IsLinux -or $IsMacOS) {
 }
 
 Write-Host "Git hooks installed successfully!"
-Write-Host "  - pre-push (version bumping)"
+Write-Host "  - pre-push (FS3511 build gate + version bumping)"

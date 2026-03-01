@@ -1,0 +1,7 @@
+<Project>
+
+  <PropertyGroup>
+    <WarningsAsErrors>$(WarningsAsErrors);FS3511</WarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
