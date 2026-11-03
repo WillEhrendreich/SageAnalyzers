@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
     <OtherFlags>$(OtherFlags) --test:GraphBasedChecking</OtherFlags>
     <OtherFlags>$(OtherFlags) --test:DumpCheckingGraph</OtherFlags>
     <NoWarn>FS0075</NoWarn>
@@ -19,7 +20,7 @@
 
   <ItemGroup>
     <Compile Include="Tests\ResultIgnoredTests.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Tests\CombinedAnalyzerTests.fs" />    <Compile Include="Program.fs" />
   </ItemGroup>
 
 </Project>

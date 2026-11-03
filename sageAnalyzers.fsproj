@@ -10,6 +10,9 @@
 
   <ItemGroup>
     <PackageReference Include="FSharp.Analyzers.SDK" Version="0.36.0" />
+    <!-- The analyzer CLI hosts FSharp.Core 10 and refuses a DLL built against a newer one, which is what
+         an SDK 11 build gives by default. Pinned so the DLL loads whichever SDK built it. -->
+    <PackageReference Update="FSharp.Core" Version="10.0.101" />
   </ItemGroup>
 
   <ItemGroup>
