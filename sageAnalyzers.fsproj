@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- Each framework gets its own output folder, and the analyzer CLI loads every DLL under the folder it
+         is given. Point its analyzers-path option at ONE of them (bin/config/net10.0 or net11.0). Given
+         bin/config it registers both builds and reports every finding twice. Both load and give identical
+         findings when the CLI runs on the .NET 11 runtime (DOTNET_ROLL_FORWARD=LatestMajor). -->
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OtherFlags>$(OtherFlags) --test:GraphBasedChecking</OtherFlags>
     <OtherFlags>$(OtherFlags) --test:DumpCheckingGraph</OtherFlags>
