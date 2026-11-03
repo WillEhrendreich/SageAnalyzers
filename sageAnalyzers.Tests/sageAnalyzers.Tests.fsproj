@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Analyzers.SDK" Version="0.36.0" />
-    <PackageReference Include="FSharp.Analyzers.SDK.Testing" Version="0.36.0" />
+    <PackageReference Include="FSharp.Analyzers.SDK" Version="0.41.0" />
+    <PackageReference Include="FSharp.Analyzers.SDK.Testing" Version="0.41.0" />
     <PackageReference Include="Expecto" Version="10.2.1" />
   </ItemGroup>
 
