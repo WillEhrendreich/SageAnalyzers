@@ -16,7 +16,7 @@ let Name = "Exception In Domain Layer Analyzer"
 let Description =
   "Detects exception-throwing calls in domain modules where Result should be used"
 
-let collectViolations (typedTree: FSharpImplementationFileContents) =
+let collectViolations (source: ISourceText) (typedTree: FSharpImplementationFileContents) =
   let violations = ResizeArray<range * string>()
   let currentModule = ref ""
 
@@ -35,7 +35,7 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
           (_args: FSharpExpr list)
           (m: range)
           =
-          if exceptionFunctions.Contains mfv.FullName then
+          if exceptionFunctions.Contains mfv.FullName && spellsCall source mfv.DisplayName m then
             let modName = currentModule.Value
             if modName <> "" && not (isInfrastructureModule modName) then
               violations.Add(
@@ -50,5 +50,5 @@ let collectViolations (typedTree: FSharpImplementationFileContents) =
   walkTast walker typedTree
   violations |> Seq.toList
 
-let analyze (typedTree: FSharpImplementationFileContents) : Message list =
-  collectViolations typedTree |> toMessages Code Name Severity.Warning
+let analyze (source: ISourceText) (typedTree: FSharpImplementationFileContents) : Message list =
+  collectViolations source typedTree |> toMessages Code Name Severity.Warning

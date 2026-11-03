@@ -9,6 +9,20 @@ let tryGetExprType (expr: FSharpExpr) =
   try Some expr.Type
   with _ -> None
 
+/// What the combined analyzer hands each analyzer: the file's typed tree and its source text. Most analyzers read only the tree.
+type AnalysisInput =
+  { TypedTree: FSharpImplementationFileContents
+    SourceText: ISourceText }
+
+/// Whether the source at `where` spells `name` as a word. A call the programmer wrote does. One the compiler added does
+/// not: the rethrow after a `try ... with` whose patterns did not match, and the stub for an incomplete `match`, are typed
+/// as calls to `reraise` and `raise` and sit on the range of the pattern or the match, whose text never says either word.
+/// When the text cannot be read the answer is yes, so a finding is never dropped for want of evidence.
+let spellsCall (source: ISourceText) (name: string) (where: range) : bool =
+  try
+    System.Text.RegularExpressions.Regex.IsMatch(source.GetSubTextFromRange where, @"\b" + System.Text.RegularExpressions.Regex.Escape name + @"\b")
+  with _ -> true
+
 /// Check if an FSharpType is Result<_,_>
 let isResultType (t: FSharpType) =
   if t.HasTypeDefinition then

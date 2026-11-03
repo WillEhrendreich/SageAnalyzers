@@ -3,6 +3,7 @@ module SageAnalyzers.CombinedAnalyzer
 open FSharp.Analyzers.SDK
 open FSharp.Compiler.Symbols
 open FSharp.Compiler.Text
+open SageAnalyzers.Util
 
 [<Literal>]
 let Name = "Sage Combined Analyzer"
@@ -15,17 +16,17 @@ let Description =
 [<Literal>]
 let faultCode = "SAGE-000"
 
-let private analyzers: (string * (FSharpImplementationFileContents -> Message list)) list =
+let private analyzers: (string * (AnalysisInput -> Message list)) list =
   [
-    ResultIgnoredAnalyzer.Name, ResultIgnoredAnalyzer.analyze
-    MutableEventTypeAnalyzer.Name, MutableEventTypeAnalyzer.analyze
-    AsyncIgnoredAnalyzer.Name, AsyncIgnoredAnalyzer.analyze
-    ExceptionInDomainLayerAnalyzer.Name, ExceptionInDomainLayerAnalyzer.analyze
-    PrimitiveObsessionAnalyzer.Name, PrimitiveObsessionAnalyzer.analyze
-    MixedErrorStrategyAnalyzer.Name, MixedErrorStrategyAnalyzer.analyze
-    MutableInPureFunctionAnalyzer.Name, MutableInPureFunctionAnalyzer.analyze
-    ImpureProjectionAnalyzer.Name, ImpureProjectionAnalyzer.analyze
-    RefCellAnalyzer.Name, RefCellAnalyzer.analyze
+    ResultIgnoredAnalyzer.Name, fun input -> ResultIgnoredAnalyzer.analyze input.TypedTree
+    MutableEventTypeAnalyzer.Name, fun input -> MutableEventTypeAnalyzer.analyze input.TypedTree
+    AsyncIgnoredAnalyzer.Name, fun input -> AsyncIgnoredAnalyzer.analyze input.TypedTree
+    ExceptionInDomainLayerAnalyzer.Name, fun input -> ExceptionInDomainLayerAnalyzer.analyze input.SourceText input.TypedTree
+    PrimitiveObsessionAnalyzer.Name, fun input -> PrimitiveObsessionAnalyzer.analyze input.TypedTree
+    MixedErrorStrategyAnalyzer.Name, fun input -> MixedErrorStrategyAnalyzer.analyze input.TypedTree
+    MutableInPureFunctionAnalyzer.Name, fun input -> MutableInPureFunctionAnalyzer.analyze input.TypedTree
+    ImpureProjectionAnalyzer.Name, fun input -> ImpureProjectionAnalyzer.analyze input.TypedTree
+    RefCellAnalyzer.Name, fun input -> RefCellAnalyzer.analyze input.TypedTree
   ]
 
 /// An analyzer that threw, as a diagnostic that names it. Information, so a file the compiler
@@ -46,16 +47,16 @@ let runIsolated (where: range) (analyzers: (string * ('a -> Message list)) list)
     try run input
     with ex -> [ faultMessage where name ex ])
 
-let analyze (typedTree: FSharpImplementationFileContents) : Message list =
+let analyze (input: AnalysisInput) : Message list =
   let start = Position.mkPos 1 0
-  runIsolated (Range.mkRange typedTree.FileName start start) analyzers typedTree
+  runIsolated (Range.mkRange input.TypedTree.FileName start start) analyzers input
 
 [<CliAnalyzer(Name, Description)>]
 let cliAnalyzer (ctx: CliContext) : Async<Message list> =
   async {
     return
       ctx.TypedTree
-      |> Option.map analyze
+      |> Option.map (fun tree -> analyze { TypedTree = tree; SourceText = ctx.SourceText })
       |> Option.defaultValue []
   }
 
@@ -64,6 +65,6 @@ let editorAnalyzer (ctx: EditorContext) : Async<Message list> =
   async {
     return
       ctx.TypedTree
-      |> Option.map analyze
+      |> Option.map (fun tree -> analyze { TypedTree = tree; SourceText = ctx.SourceText })
       |> Option.defaultValue []
   }
